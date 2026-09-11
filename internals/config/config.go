@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -14,7 +15,9 @@ type Config struct {
 
 func MustLoad() *Config {
 
-	godotenv.Load("../../.env")
+	if err := godotenv.Load(".env"); err != nil {
+		panic(fmt.Errorf("config.load.file: %v", err))
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
