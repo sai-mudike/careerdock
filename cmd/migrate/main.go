@@ -29,7 +29,7 @@ func main() {
 			}
 			fmt.Println("migrated up")
 		case "down":
-			if err := m.Down(); err != nil {
+			if err := m.Steps(-1); err != nil {
 				panic(err)
 			}
 			fmt.Println("migrated down")
