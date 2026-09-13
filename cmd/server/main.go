@@ -12,13 +12,21 @@ import (
 func main() {
 
 	config := config.MustLoad()
-	_, err := db.Connect(os.Getenv("DATABASE_URL"))
+	err := db.Connect(os.Getenv("DATABASE_URL"))
 	if err != nil {
 		panic(err)
 	}
-
 	server := gin.Default()
+
+	// JOB Routes
+	server.POST("/api/jobs", handlers.CreateJOB)
+	server.GET("/api/jobs", handlers.GetJobs)
+	server.GET("/api/jobs/:id", handlers.GetJobByID)
+	server.PUT("/api/jobs/:id", handlers.UpdateJob)
+	server.DELETE("/api/jobs/:id", handlers.DeleteJob)
+	// API Health
 	server.GET("/healthz", handlers.Health)
+
 	server.Run(":" + config.Port)
 
 }

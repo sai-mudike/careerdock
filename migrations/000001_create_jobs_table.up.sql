@@ -13,4 +13,5 @@ CREATE TABLE IF NOT EXISTS jobs(
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 CHECK(salary_min IS NULL OR salary_max IS NULL OR salary_max>=salary_min)
 
+
 );

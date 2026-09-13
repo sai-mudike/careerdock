@@ -9,20 +9,23 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
-func Connect(dataBaseURL string) (*sql.DB, error) {
-	db, err := sql.Open("pgx", dataBaseURL)
+var DB *sql.DB
+
+func Connect(dataBaseURL string) error {
+	var err error
+	DB, err = sql.Open("pgx", dataBaseURL)
 
 	if err != nil {
-		return nil, fmt.Errorf("db.connect: %v", err.Error())
+		return fmt.Errorf("DB.connect: %v", err.Error())
 	}
 
-	db.SetMaxOpenConns(15)
-	db.SetMaxIdleConns(5)
-	db.SetConnMaxLifetime(5 * time.Minute)
+	DB.SetMaxOpenConns(15)
+	DB.SetMaxIdleConns(5)
+	DB.SetConnMaxLifetime(5 * time.Minute)
 
-	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("db.ping: %v", err.Error())
+	if err := DB.Ping(); err != nil {
+		return fmt.Errorf("DB.ping: %v", err.Error())
 	}
 
-	return db, nil
+	return nil
 }
