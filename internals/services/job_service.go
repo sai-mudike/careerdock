@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/sai-mudike/careerdock.git/internals/customErr"
 	"github.com/sai-mudike/careerdock.git/internals/models"
 	"github.com/sai-mudike/careerdock.git/internals/repositories"
 )
@@ -12,7 +13,7 @@ import (
 func CreateJOB(ctx context.Context, job models.Job) (models.Job, error) {
 	uui, err := uuid.Parse("8e6c7811-9a7c-47b7-85b8-5c02b9e11c52")
 	if err != nil {
-		return models.Job{}, err
+		return models.Job{}, customErr.ErrInvalidRequest
 	}
 
 	job.UserID = uui
@@ -41,7 +42,7 @@ func GetJobByID(ctx context.Context, jobID string) (models.Job, error) {
 	parsedUUID, err := uuid.Parse(jobID)
 
 	if err != nil {
-		return models.Job{}, err
+		return models.Job{}, customErr.ErrInvalidRequest
 	}
 
 	jobsFromDB, err := repositories.GetJobByID(ctx, parsedUUID)
@@ -57,7 +58,7 @@ func UpdateJob(ctx context.Context, jobID string, job *models.Job) (models.Job, 
 
 	parsedUUID, err := uuid.Parse(jobID)
 	if err != nil {
-		return models.Job{}, err
+		return models.Job{}, customErr.ErrInvalidRequest
 	}
 
 	job.Id = parsedUUID
@@ -80,7 +81,7 @@ func DeleteJob(ctx context.Context, jobID string) error {
 	parsedUUID, err := uuid.Parse(jobID)
 
 	if err != nil {
-		return err
+		return customErr.ErrInvalidRequest
 	}
 
 	_, err = repositories.GetJobByID(ctx, parsedUUID)
@@ -90,6 +91,9 @@ func DeleteJob(ctx context.Context, jobID string) error {
 
 	err = repositories.DeleteJob(ctx, parsedUUID)
 
-	return err
+	if err != nil {
+		return err
+	}
+	return nil
 
 }

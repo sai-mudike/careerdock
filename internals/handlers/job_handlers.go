@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sai-mudike/careerdock.git/internals/customErr"
 	"github.com/sai-mudike/careerdock.git/internals/models"
 	"github.com/sai-mudike/careerdock.git/internals/services"
 )
@@ -15,14 +16,14 @@ func CreateJOB(context *gin.Context) {
 	err := context.ShouldBindJSON(&jobFromClient)
 
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "invalid job data", "err": err.Error()})
+		HandleError(context, customErr.ErrInvalidJobData)
 		return
 	}
 
 	jobFromDB, err := services.CreateJOB(ctx, jobFromClient)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not create the job", "err": err.Error()})
+		HandleError(context, err)
 
 		return
 	}
@@ -36,7 +37,7 @@ func GetJobs(context *gin.Context) {
 	jobs, err := services.GetAllJobs(ctx)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not get the jobs", "err": err.Error()})
+		HandleError(context, err)
 		return
 	}
 	context.JSON(http.StatusOK, jobs)
@@ -49,8 +50,7 @@ func GetJobByID(context *gin.Context) {
 
 	job, err := services.GetJobByID(ctx, jobID)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not get the job", "err": err.Error()})
-
+		HandleError(context, err)
 		return
 	}
 
@@ -64,13 +64,13 @@ func UpdateJob(context *gin.Context) {
 	var jobFromClient models.Job
 	err := context.ShouldBindJSON(&jobFromClient)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"message": "invalid job data", "err": err.Error()})
+		HandleError(context, customErr.ErrInvalidJobData)
 		return
 	}
 
 	updatedJOB, err := services.UpdateJob(ctx, jobID, &jobFromClient)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not update the job", "err": err.Error()})
+		HandleError(context, err)
 
 		return
 	}
@@ -86,8 +86,7 @@ func DeleteJob(context *gin.Context) {
 	err := services.DeleteJob(ctx, jobID)
 
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"message": "could not delete the job", "err": err.Error()})
-
+		HandleError(context, err)
 		return
 	}
 

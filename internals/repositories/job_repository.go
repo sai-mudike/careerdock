@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-
+	"github.com/sai-mudike/careerdock.git/internals/customErr"
 	"github.com/sai-mudike/careerdock.git/internals/db"
 	"github.com/sai-mudike/careerdock.git/internals/models"
 )
@@ -30,7 +30,7 @@ RETURNING id,user_id,company_name,position,job_url,location,employment_type,sala
 	err = row.Scan(&jobFromDB.Id, &jobFromDB.UserID, &jobFromDB.CompanyName, &jobFromDB.Position, &jobFromDB.JobURL, &jobFromDB.Location, &jobFromDB.EmploymentType, &jobFromDB.SalaryMin, &jobFromDB.SalaryMax, &jobFromDB.Description)
 
 	if err != nil {
-		return models.Job{}, err
+		return models.Job{}, customErr.ErrInternal
 	}
 
 	return jobFromDB, nil
@@ -56,14 +56,14 @@ func GetAllJobs(ctx context.Context) ([]models.Job, error) {
 		err := rows.Scan(&singleJob.Id, &singleJob.UserID, &singleJob.CompanyName, &singleJob.Position, &singleJob.JobURL, &singleJob.Location, &singleJob.EmploymentType, &singleJob.SalaryMin, &singleJob.SalaryMax, &singleJob.Description, &singleJob.CreatedAT, &singleJob.UpdatedAT)
 
 		if err != nil {
-			return nil, err
+			return nil, customErr.ErrInternal
 		}
 
 		jobsList = append(jobsList, singleJob)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, customErr.ErrInternal
 	}
 
 	return jobsList, nil
@@ -85,7 +85,7 @@ SELECT * FROM jobs WHERE id=$1;
 	err := row.Scan(&singleJob.Id, &singleJob.UserID, &singleJob.CompanyName, &singleJob.Position, &singleJob.JobURL, &singleJob.Location, &singleJob.EmploymentType, &singleJob.SalaryMin, &singleJob.SalaryMax, &singleJob.Description, &singleJob.CreatedAT, &singleJob.UpdatedAT)
 
 	if err != nil {
-		return models.Job{}, err
+		return models.Job{}, customErr.ErrInternal
 	}
 
 	return singleJob, nil
@@ -110,7 +110,7 @@ func UpdateJob(ctx context.Context, job models.Job) (models.Job, error) {
 	row := smt.QueryRowContext(ctx, job.Id, job.CompanyName, job.Position, job.JobURL, job.Location, job.EmploymentType, job.SalaryMin, job.SalaryMax, job.Description)
 
 	if err := row.Err(); err != nil {
-		return models.Job{}, err
+		return models.Job{}, customErr.ErrInternal
 	}
 
 	var singleJob models.Job
@@ -118,7 +118,7 @@ func UpdateJob(ctx context.Context, job models.Job) (models.Job, error) {
 	err = row.Scan(&singleJob.Id, &singleJob.UserID, &singleJob.CompanyName, &singleJob.Position, &singleJob.JobURL, &singleJob.Location, &singleJob.EmploymentType, &singleJob.SalaryMin, &singleJob.SalaryMax, &singleJob.Description, &singleJob.CreatedAT, &singleJob.UpdatedAT)
 
 	if err != nil {
-		return models.Job{}, err
+		return models.Job{}, customErr.ErrInternal
 	}
 
 	return singleJob, nil
@@ -132,6 +132,10 @@ func DeleteJob(ctx context.Context, JobID uuid.UUID) error {
 
 	_, err := db.DB.ExecContext(ctx, query, JobID)
 
-	return err
+	if err != nil {
+
+		return customErr.ErrInternal
+	}
+	return nil
 
 }
