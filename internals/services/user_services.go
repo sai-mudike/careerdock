@@ -10,7 +10,15 @@ import (
 
 func CreateUser(ctx context.Context, user models.User) error {
 
-	err := repositories.CreateUser(ctx, user)
+	hashPass, err := generateHashPass(user.PassWord)
+
+	if err != nil {
+		return err
+	}
+
+	user.PassWord = hashPass
+
+	err = repositories.CreateUser(ctx, user)
 
 	if err != nil {
 		return err
@@ -26,7 +34,9 @@ func UserLogin(ctx context.Context, user models.User) error {
 		return err
 	}
 
-	if userFromDb.PassWord != user.PassWord {
+	isPassValid := comapreHashAndPass(userFromDb.PassWord, user.PassWord)
+
+	if !isPassValid {
 		return customErr.ErrInvalidCredentials
 	}
 
