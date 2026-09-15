@@ -24,6 +24,10 @@ func main() {
 	server.GET("/api/jobs/:id", handlers.GetJobByID)
 	server.PUT("/api/jobs/:id", handlers.UpdateJob)
 	server.DELETE("/api/jobs/:id", handlers.DeleteJob)
+
+	// User Routes
+	server.POST("/api/register", handlers.RegisterUser)
+	server.POST("/api/login", handlers.UserLogin)
 	// API Health
 	server.GET("/healthz", handlers.Health)
 

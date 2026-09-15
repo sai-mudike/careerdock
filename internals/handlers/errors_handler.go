@@ -148,7 +148,8 @@ func HandleError(c *gin.Context, err error) {
 			Message: "An account with this resume already exists",
 		})
 
-	// 500 Internal Server Error
+		// 500 Internal Server Error
+
 	default:
 		c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorResponse{
 			Code:    "INTERNAL_SERVER_ERROR",

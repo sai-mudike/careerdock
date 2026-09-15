@@ -39,5 +39,6 @@ var (
 	ErrResumeAlreadyExists = errors.New("resume already exists")
 
 	// 500 Internal Server Error
-	ErrInternal = errors.New("internal server error")
+	ErrInternal       = errors.New("internal server error")
+	ErrUserNotCreated = errors.New("unable to register user.")
 )
