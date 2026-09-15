@@ -85,7 +85,7 @@ SELECT * FROM jobs WHERE id=$1;
 	err := row.Scan(&singleJob.Id, &singleJob.UserID, &singleJob.CompanyName, &singleJob.Position, &singleJob.JobURL, &singleJob.Location, &singleJob.EmploymentType, &singleJob.SalaryMin, &singleJob.SalaryMax, &singleJob.Description, &singleJob.CreatedAT, &singleJob.UpdatedAT)
 
 	if err != nil {
-		return models.Job{}, customErr.ErrInternal
+		return models.Job{}, customErr.ErrJobNotFound
 	}
 
 	return singleJob, nil
