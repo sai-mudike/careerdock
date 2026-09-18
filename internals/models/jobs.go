@@ -2,13 +2,11 @@ package models
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Job struct {
-	Id             uuid.UUID `json:"id"`
-	UserID         uuid.UUID `json:"user_id"`
+	Id             string    `json:"id"`
+	UserID         string    `json:"user_id"`
 	CompanyName    string    `json:"company_name" binding:"required"`
 	Position       string    `json:"position" binding:"required"`
 	JobURL         string    `json:"job_url"`

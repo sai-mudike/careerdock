@@ -3,20 +3,12 @@ package services
 import (
 	"context"
 
-	"github.com/google/uuid"
-
 	"github.com/sai-mudike/careerdock.git/internals/customErr"
 	"github.com/sai-mudike/careerdock.git/internals/models"
 	"github.com/sai-mudike/careerdock.git/internals/repositories"
 )
 
 func CreateJOB(ctx context.Context, job models.Job) (models.Job, error) {
-	uui, err := uuid.Parse("8e6c7811-9a7c-47b7-85b8-5c02b9e11c52")
-	if err != nil {
-		return models.Job{}, customErr.ErrInvalidRequest
-	}
-
-	job.UserID = uui
 
 	jobFromDB, err := repositories.CreateJob(ctx, job)
 	if err != nil {
@@ -26,9 +18,9 @@ func CreateJOB(ctx context.Context, job models.Job) (models.Job, error) {
 	return jobFromDB, nil
 }
 
-func GetAllJobs(ctx context.Context) ([]models.Job, error) {
+func GetAllJobs(ctx context.Context, userID string) ([]models.Job, error) {
 
-	jobsFromDB, err := repositories.GetAllJobs(ctx)
+	jobsFromDB, err := repositories.GetAllJobs(ctx, userID)
 
 	if err != nil {
 		return nil, err
@@ -38,14 +30,9 @@ func GetAllJobs(ctx context.Context) ([]models.Job, error) {
 
 }
 
-func GetJobByID(ctx context.Context, jobID string) (models.Job, error) {
-	parsedUUID, err := uuid.Parse(jobID)
+func GetJobByID(ctx context.Context, jobID string, userID string) (models.Job, error) {
 
-	if err != nil {
-		return models.Job{}, customErr.ErrInvalidRequest
-	}
-
-	jobsFromDB, err := repositories.GetJobByID(ctx, parsedUUID)
+	jobsFromDB, err := repositories.GetJobByID(ctx, jobID, userID)
 
 	if err != nil {
 		return models.Job{}, err
@@ -54,21 +41,19 @@ func GetJobByID(ctx context.Context, jobID string) (models.Job, error) {
 	return jobsFromDB, nil
 }
 
-func UpdateJob(ctx context.Context, jobID string, job *models.Job) (models.Job, error) {
+func UpdateJob(ctx context.Context, jobID string, job models.Job) (models.Job, error) {
 
-	parsedUUID, err := uuid.Parse(jobID)
-	if err != nil {
-		return models.Job{}, customErr.ErrInvalidRequest
-	}
-
-	job.Id = parsedUUID
-
-	_, err = repositories.GetJobByID(ctx, parsedUUID)
+	jobFromDB, err := repositories.GetJobByID(ctx, jobID, job.UserID)
 	if err != nil {
 		return models.Job{}, err
 	}
 
-	updatedJob, err := repositories.UpdateJob(ctx, *job)
+	if jobFromDB.UserID != job.UserID {
+		return models.Job{}, customErr.ErrUnauthorized
+
+	}
+
+	updatedJob, err := repositories.UpdateJob(ctx, jobID, job)
 	if err != nil {
 		return models.Job{}, err
 	}
@@ -77,19 +62,18 @@ func UpdateJob(ctx context.Context, jobID string, job *models.Job) (models.Job, 
 
 }
 
-func DeleteJob(ctx context.Context, jobID string) error {
-	parsedUUID, err := uuid.Parse(jobID)
+func DeleteJob(ctx context.Context, jobID, userID string) error {
 
-	if err != nil {
-		return customErr.ErrInvalidRequest
-	}
-
-	_, err = repositories.GetJobByID(ctx, parsedUUID)
+	jobFromDB, err := repositories.GetJobByID(ctx, jobID, userID)
 	if err != nil {
 		return err
 	}
+	if jobFromDB.UserID != userID {
+		return customErr.ErrUnauthorized
 
-	err = repositories.DeleteJob(ctx, parsedUUID)
+	}
+
+	err = repositories.DeleteJob(ctx, jobID)
 
 	if err != nil {
 		return err

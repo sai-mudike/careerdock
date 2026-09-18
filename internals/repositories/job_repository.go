@@ -3,7 +3,6 @@ package repositories
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/sai-mudike/careerdock.git/internals/customErr"
 	"github.com/sai-mudike/careerdock.git/internals/db"
 	"github.com/sai-mudike/careerdock.git/internals/models"
@@ -37,11 +36,11 @@ RETURNING id,user_id,company_name,position,job_url,location,employment_type,sala
 
 }
 
-func GetAllJobs(ctx context.Context) ([]models.Job, error) {
+func GetAllJobs(ctx context.Context, userId string) ([]models.Job, error) {
 	query := `
-	SELECT * FROM jobs;
+	SELECT * FROM jobs WHERE user_id=$1;
 	`
-	rows, err := db.DB.QueryContext(ctx, query)
+	rows, err := db.DB.QueryContext(ctx, query, userId)
 
 	if err != nil {
 		return nil, err
@@ -69,12 +68,12 @@ func GetAllJobs(ctx context.Context) ([]models.Job, error) {
 	return jobsList, nil
 }
 
-func GetJobByID(ctx context.Context, jobID uuid.UUID) (models.Job, error) {
+func GetJobByID(ctx context.Context, jobID string, userID string) (models.Job, error) {
 	query := `
-SELECT * FROM jobs WHERE id=$1;
+SELECT * FROM jobs WHERE id=$1 AND user_id=$2;
 `
 
-	row := db.DB.QueryRowContext(ctx, query, jobID)
+	row := db.DB.QueryRowContext(ctx, query, jobID, userID)
 
 	if err := row.Err(); err != nil {
 		return models.Job{}, err
@@ -91,7 +90,7 @@ SELECT * FROM jobs WHERE id=$1;
 	return singleJob, nil
 }
 
-func UpdateJob(ctx context.Context, job models.Job) (models.Job, error) {
+func UpdateJob(ctx context.Context, jobID string, job models.Job) (models.Job, error) {
 
 	query := `
 	UPDATE jobs
@@ -107,10 +106,10 @@ func UpdateJob(ctx context.Context, job models.Job) (models.Job, error) {
 
 	defer smt.Close()
 
-	row := smt.QueryRowContext(ctx, job.Id, job.CompanyName, job.Position, job.JobURL, job.Location, job.EmploymentType, job.SalaryMin, job.SalaryMax, job.Description)
+	row := smt.QueryRowContext(ctx, jobID, job.CompanyName, job.Position, job.JobURL, job.Location, job.EmploymentType, job.SalaryMin, job.SalaryMax, job.Description)
 
 	if err := row.Err(); err != nil {
-		return models.Job{}, customErr.ErrInternal
+		return models.Job{}, err
 	}
 
 	var singleJob models.Job
@@ -118,14 +117,14 @@ func UpdateJob(ctx context.Context, job models.Job) (models.Job, error) {
 	err = row.Scan(&singleJob.Id, &singleJob.UserID, &singleJob.CompanyName, &singleJob.Position, &singleJob.JobURL, &singleJob.Location, &singleJob.EmploymentType, &singleJob.SalaryMin, &singleJob.SalaryMax, &singleJob.Description, &singleJob.CreatedAT, &singleJob.UpdatedAT)
 
 	if err != nil {
-		return models.Job{}, customErr.ErrInternal
+		return models.Job{}, err
 	}
 
 	return singleJob, nil
 
 }
 
-func DeleteJob(ctx context.Context, JobID uuid.UUID) error {
+func DeleteJob(ctx context.Context, JobID string) error {
 	query := `
 	DELETE FROM jobs WHERE id=$1;
 	`

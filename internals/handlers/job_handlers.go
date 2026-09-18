@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,12 +14,17 @@ func CreateJOB(context *gin.Context) {
 
 	var jobFromClient models.Job
 	ctx := context.Request.Context()
+	userIdFromContext := context.GetString("userID")
+	fmt.Println(userIdFromContext)
+
 	err := context.ShouldBindJSON(&jobFromClient)
 
 	if err != nil {
-		HandleError(context, customErr.ErrInvalidJobData)
+		HandleError(context, err)
 		return
 	}
+
+	jobFromClient.UserID = userIdFromContext
 
 	jobFromDB, err := services.CreateJOB(ctx, jobFromClient)
 
@@ -34,7 +40,9 @@ func CreateJOB(context *gin.Context) {
 
 func GetJobs(context *gin.Context) {
 	ctx := context.Request.Context()
-	jobs, err := services.GetAllJobs(ctx)
+	userIdFromContext := context.GetString("userID")
+
+	jobs, err := services.GetAllJobs(ctx, userIdFromContext)
 
 	if err != nil {
 		HandleError(context, err)
@@ -47,8 +55,9 @@ func GetJobs(context *gin.Context) {
 func GetJobByID(context *gin.Context) {
 	ctx := context.Request.Context()
 	jobID := context.Param("id")
+	userIdFromContext := context.GetString("userID")
 
-	job, err := services.GetJobByID(ctx, jobID)
+	job, err := services.GetJobByID(ctx, jobID, userIdFromContext)
 	if err != nil {
 		HandleError(context, err)
 		return
@@ -60,6 +69,7 @@ func GetJobByID(context *gin.Context) {
 func UpdateJob(context *gin.Context) {
 	jobID := context.Param("id")
 	ctx := context.Request.Context()
+	userIdFromContext := context.GetString("userID")
 
 	var jobFromClient models.Job
 	err := context.ShouldBindJSON(&jobFromClient)
@@ -68,7 +78,9 @@ func UpdateJob(context *gin.Context) {
 		return
 	}
 
-	updatedJOB, err := services.UpdateJob(ctx, jobID, &jobFromClient)
+	jobFromClient.UserID = userIdFromContext
+
+	updatedJOB, err := services.UpdateJob(ctx, jobID, jobFromClient)
 	if err != nil {
 		HandleError(context, err)
 
@@ -82,8 +94,9 @@ func UpdateJob(context *gin.Context) {
 func DeleteJob(context *gin.Context) {
 	ctx := context.Request.Context()
 	jobID := context.Param("id")
+	userIdFromContext := context.GetString("userID")
 
-	err := services.DeleteJob(ctx, jobID)
+	err := services.DeleteJob(ctx, jobID, userIdFromContext)
 
 	if err != nil {
 		HandleError(context, err)

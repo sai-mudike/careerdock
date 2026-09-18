@@ -46,13 +46,13 @@ func UserLogin(context *gin.Context) {
 		return
 	}
 
-	err = services.UserLogin(ctx, user)
+	token, err := services.UserLogin(ctx, user)
 
 	if err != nil {
 		HandleError(context, err)
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{"message": "loged in successfully"})
+	context.JSON(http.StatusOK, gin.H{"message": "loged in successfully", "token": token})
 
 }

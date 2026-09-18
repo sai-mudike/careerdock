@@ -52,3 +52,24 @@ func GetUser(ctx context.Context, user models.User) (*models.User, error) {
 	return &userFromDB, nil
 
 }
+
+// func UserExists(ctx context.Context, userID string) (bool, error) {
+// 	query := `
+// SELECT EXISTS(
+// SELECT 1 FROM users WHERE id=$1
+// );
+// `
+
+// 	var ifExists bool
+
+// 	row := db.DB.QueryRowContext(ctx, query, userID)
+
+// 	err := row.Scan(&ifExists)
+
+// 	if err != nil {
+// 		return false, customErr.ErrUnauthorized
+// 	}
+
+// 	return ifExists, nil
+
+// }

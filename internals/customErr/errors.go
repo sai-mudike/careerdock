@@ -22,6 +22,7 @@ var (
 	ErrInvalidToken       = errors.New("invalid token")
 	ErrTokenExpired       = errors.New("token expired")
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrUnauthorized       = errors.New("Invalid or malformed authentication")
 
 	// 403 Forbidden
 	ErrForbidden = errors.New("forbidden")
@@ -39,6 +40,7 @@ var (
 	ErrResumeAlreadyExists = errors.New("resume already exists")
 
 	// 500 Internal Server Error
-	ErrInternal       = errors.New("internal server error")
-	ErrUserNotCreated = errors.New("unable to register user.")
+	ErrInternal        = errors.New("internal server error")
+	ErrUserNotCreated  = errors.New("unable to register user.")
+	ErrTokenGeneration = errors.New("Failed to issue session token. Please try again later.")
 )

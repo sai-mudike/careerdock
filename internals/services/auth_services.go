@@ -1,21 +1,12 @@
 package services
 
-import (
-	"golang.org/x/crypto/bcrypt"
-)
+// func VerifyUserExists(ctx context.Context, userID string) (bool, error) {
 
-func generateHashPass(password string) (string, error) {
+// 	exists, err := repositories.UserExists(ctx, userID)
 
-	hashPass, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+// 	if err != nil {
+// 		return false, err
+// 	}
 
-	return string(hashPass), err
-
-}
-
-func comapreHashAndPass(passFromDB, passFromUser string) bool {
-
-	err := bcrypt.CompareHashAndPassword([]byte(passFromDB), []byte(passFromUser))
-
-	return err == nil
-
-}
+// 	return exists, nil
+// }
