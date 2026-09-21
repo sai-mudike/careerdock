@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS jobs(
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
+    user_id UUID  NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     company_name VARCHAR(250) NOT NULL,
     position VARCHAR(250) NOT NULL,
     job_url VARCHAR(500),

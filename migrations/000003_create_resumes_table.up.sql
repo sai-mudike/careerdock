@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS resumes(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    file_name VARCHAR(100) NOT NULL,
+    file_path TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+
+);
