@@ -16,6 +16,7 @@ var (
 	ErrInvalidSortOrder       = errors.New("invalid sorting order")
 	ErrInvalidResumeData      = errors.New("invalid Resume data")
 	ErrInvalidResumeFile_path = errors.New("invalid resume file path")
+	ErrInvalidJobQuery        = errors.New("invalid sort and filter")
 
 	// 401 Unauthorized
 	ErrMissingToken       = errors.New("missing token")

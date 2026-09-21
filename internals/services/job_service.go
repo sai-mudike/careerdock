@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -29,9 +30,15 @@ func CreateJOB(ctx context.Context, userID string, job models.JobRequest) (model
 	return *jobResponceDTO, nil
 }
 
-func GetAllJobs(ctx context.Context, userID string) ([]models.JobResponse, error) {
+func GetAllJobs(ctx context.Context, userID string, query models.JobQuery) ([]models.JobResponse, error) {
 
-	jobsFromDB, err := repositories.GetAllJobs(ctx, userID)
+	err := validateQuery(&query)
+
+	if err != nil {
+		return nil, err
+	}
+
+	jobsFromDB, err := repositories.GetAllJobs(ctx, userID, query)
 
 	if err != nil {
 		return nil, err
@@ -155,4 +162,45 @@ func validateJob(job *models.Job) error {
 	}
 
 	return nil
+}
+
+func validateQuery(query *models.JobQuery) error {
+
+	allowedSorts := map[string]bool{
+		"created_at":   true,
+		"updated_at":   true,
+		"company_name": true,
+		"salary_min":   true,
+		"salary_max":   true,
+	}
+
+	if query.Page <= 0 {
+		return customErr.ErrInvalidPagination
+	}
+
+	if query.Limit <= 0 || query.Limit >= 100 {
+		return customErr.ErrInvalidPagination
+	}
+
+	if !allowedSorts[query.SortBy] {
+
+		fmt.Println(query.SortBy)
+		return customErr.ErrInvalidSort
+
+	}
+
+	if query.OrderBy != "asc" && query.OrderBy != "desc" {
+
+		return customErr.ErrInvalidSortOrder
+	}
+
+	if query.OrderBy == "asc" {
+		query.OrderBy = "ASC"
+	}
+	if query.OrderBy == "desc" {
+		query.OrderBy = "DESC"
+	}
+
+	return nil
+
 }

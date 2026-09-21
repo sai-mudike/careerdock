@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/sai-mudike/careerdock.git/internals/customErr"
 	"github.com/sai-mudike/careerdock.git/internals/db"
@@ -36,11 +37,26 @@ RETURNING *;
 
 }
 
-func GetAllJobs(ctx context.Context, userId string) ([]models.JobResponse, error) {
+func GetAllJobs(ctx context.Context, userId string, jobQuery models.JobQuery) ([]models.JobResponse, error) {
 	query := `
-	SELECT id,company_name,position,job_url,location,employment_type,salary_min,salary_max,description,created_at,updated_at FROM jobs WHERE user_id=$1;
+	SELECT id,company_name,position,job_url,location,employment_type,salary_min,salary_max,description,created_at,updated_at FROM jobs WHERE user_id=$1
 	`
-	rows, err := db.DB.QueryContext(ctx, query, userId)
+
+	queryArgs := []any{userId}
+	argsCount := 2
+
+	if jobQuery.OrderBy != "" {
+		query += fmt.Sprintf(" ORDER BY %s %s", jobQuery.SortBy, jobQuery.OrderBy)
+	}
+
+	if jobQuery.Page >= 1 {
+
+		offset := (jobQuery.Page - 1) * jobQuery.Limit
+		query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", argsCount, argsCount+1)
+		queryArgs = append(queryArgs, jobQuery.Limit, offset)
+	}
+
+	rows, err := db.DB.QueryContext(ctx, query, queryArgs...)
 
 	if err != nil {
 		return nil, err

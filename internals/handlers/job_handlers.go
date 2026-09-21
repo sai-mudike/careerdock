@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sai-mudike/careerdock.git/internals/customErr"
@@ -38,7 +39,26 @@ func GetJobs(context *gin.Context) {
 	ctx := context.Request.Context()
 	userIdFromContext := context.GetString("userID")
 
-	jobs, err := services.GetAllJobs(ctx, userIdFromContext)
+	page, err := strconv.Atoi(context.DefaultQuery("page", "1"))
+	if err != nil {
+		HandleError(context, customErr.ErrInvalidJobQuery)
+		return
+	}
+
+	limit, err := strconv.Atoi(context.DefaultQuery("limit", "10"))
+	if err != nil {
+		HandleError(context, customErr.ErrInvalidJobQuery)
+		return
+	}
+
+	query := models.JobQuery{
+		Page:    page,
+		Limit:   limit,
+		SortBy:  context.DefaultQuery("sortby", "created_at"),
+		OrderBy: context.DefaultQuery("orderby", "desc"),
+	}
+
+	jobs, err := services.GetAllJobs(ctx, userIdFromContext, query)
 
 	if err != nil {
 		HandleError(context, err)
