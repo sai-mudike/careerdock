@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,21 +11,18 @@ import (
 
 func CreateJOB(context *gin.Context) {
 
-	var jobFromClient models.Job
+	var jobFromClient models.JobRequest
 	ctx := context.Request.Context()
 	userIdFromContext := context.GetString("userID")
-	fmt.Println(userIdFromContext)
 
 	err := context.ShouldBindJSON(&jobFromClient)
 
 	if err != nil {
-		HandleError(context, err)
+		HandleError(context, customErr.ErrInvalidJobData)
 		return
 	}
 
-	jobFromClient.UserID = userIdFromContext
-
-	jobFromDB, err := services.CreateJOB(ctx, jobFromClient)
+	jobFromDB, err := services.CreateJOB(ctx, userIdFromContext, jobFromClient)
 
 	if err != nil {
 		HandleError(context, err)
@@ -71,16 +67,14 @@ func UpdateJob(context *gin.Context) {
 	ctx := context.Request.Context()
 	userIdFromContext := context.GetString("userID")
 
-	var jobFromClient models.Job
+	var jobFromClient models.JobRequest
 	err := context.ShouldBindJSON(&jobFromClient)
 	if err != nil {
 		HandleError(context, customErr.ErrInvalidJobData)
 		return
 	}
 
-	jobFromClient.UserID = userIdFromContext
-
-	updatedJOB, err := services.UpdateJob(ctx, jobID, jobFromClient)
+	updatedJOB, err := services.UpdateJob(ctx, jobID, userIdFromContext, jobFromClient)
 	if err != nil {
 		HandleError(context, err)
 
