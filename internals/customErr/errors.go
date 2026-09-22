@@ -5,6 +5,7 @@ import "errors"
 var (
 	// 400 Bad Request
 	ErrInvalidRequest         = errors.New("invalid request")
+	ErrInvalidUUID            = errors.New("invalid UUID")
 	ErrInvalidJobData         = errors.New("invalid job data")
 	ErrInvalidSalaryRange     = errors.New("invalid salary range")
 	ErrInvalidStatus          = errors.New("invalid job status")
@@ -17,6 +18,8 @@ var (
 	ErrInvalidResumeData      = errors.New("invalid Resume data")
 	ErrInvalidResumeFile_path = errors.New("invalid resume file path")
 	ErrInvalidJobQuery        = errors.New("invalid sort and filter")
+	ErrResumeName             = errors.New("Resume Name required")
+	ErrInvalidFileType        = errors.New("only pdf files are accepted")
 
 	// 401 Unauthorized
 	ErrMissingToken       = errors.New("missing token")
@@ -32,13 +35,16 @@ var (
 	ErrUserNotFound                   = errors.New("user not found")
 	ErrJobNotFound                    = errors.New("job not found")
 	ErrResumeNotFound                 = errors.New("Resume not found")
-	ErrApplicationAlreadyExists       = errors.New("Application not found")
+	ErrApplicationNotFound            = errors.New("Application not found")
 	ErrApplicationJobOrResumeNotFound = errors.New("job or resume not found")
 
 	// 409 Conflict
 	ErrEmailAlreadyExists  = errors.New("email already exists")
 	ErrDuplicateJob        = errors.New("job already exists")
 	ErrResumeAlreadyExists = errors.New("resume already exists")
+
+	// 413 REQUEST ENTITY TOO LARGE
+	ErrMaxResumeSize = errors.New("Resume must not exceed 5 MB")
 
 	// 500 Internal Server Error
 	ErrInternal        = errors.New("internal server error")

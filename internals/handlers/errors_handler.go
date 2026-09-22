@@ -21,6 +21,12 @@ func HandleError(c *gin.Context, err error) {
 			Message: fmt.Sprintf("Invalid request %v", err.Error()),
 		})
 
+	case errors.Is(err, customErr.ErrResumeName):
+		c.JSON(http.StatusBadRequest, models.ErrorResponse{
+			Code:    "RESUME_NAME_REQUIRED",
+			Message: "resume name is required",
+		})
+
 	case errors.Is(err, customErr.ErrInvalidJobData):
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Code:    "INVALID_JOB_DATA",
@@ -75,6 +81,12 @@ func HandleError(c *gin.Context, err error) {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Code:    "INVALID_RESUME_FILE_PATH",
 			Message: "invalid resume file path"})
+
+	case errors.Is(err, customErr.ErrMaxResumeSize):
+		c.JSON(http.StatusRequestEntityTooLarge, models.ErrorResponse{
+			Code:    "FILE_TOO_LARGE",
+			Message: "Resume must not exceed 5 MB",
+		})
 
 	// 401 Unauthorized
 	case errors.Is(err, customErr.ErrMissingToken):

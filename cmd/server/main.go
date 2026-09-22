@@ -18,6 +18,7 @@ func main() {
 		panic(err)
 	}
 	server := gin.Default()
+	server.MaxMultipartMemory = 5 << 20
 
 	authenticator := server.Group("/")
 	authenticator.Use(middleware.Authenticate)
@@ -28,6 +29,12 @@ func main() {
 	authenticator.GET("/api/jobs/:id", handlers.GetJobByID)
 	authenticator.PUT("/api/jobs/:id", handlers.UpdateJob)
 	authenticator.DELETE("/api/jobs/:id", handlers.DeleteJob)
+
+	// Resume Routes
+	authenticator.POST("/api/resumes", handlers.UploadResume)
+	authenticator.GET("/api/resumes", handlers.GetResumes)
+	authenticator.GET("/api/resumes/:id", handlers.GetResumeByID)
+	authenticator.DELETE("/api/resumes/:id", handlers.DeleteResume)
 
 	// User Routes
 	server.POST("/api/register", handlers.RegisterUser)
