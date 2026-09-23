@@ -2,7 +2,10 @@ package repositories
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/sai-mudike/careerdock.git/internals/customErr"
@@ -22,10 +25,10 @@ func CreateUser(ctx context.Context, user models.User) error {
 	if err != nil {
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23505" {
-				return customErr.ErrEmailAlreadyExists
+				return customErr.New(customErr.CodeEmailAlreadyExists, "email already exists", http.StatusConflict, err)
 			}
 		}
-		return customErr.ErrUserNotCreated
+		return fmt.Errorf("create user: %w", err)
 	}
 	return nil
 
@@ -44,7 +47,12 @@ func GetUser(ctx context.Context, user models.User) (*models.User, error) {
 	err := row.Scan(&userFromDB.Id, &userFromDB.PassWord)
 
 	if err != nil {
-		return nil, customErr.ErrUserNotFound
+
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, customErr.New(customErr.CodeUserNotFound, "user not found", http.StatusNotFound, err)
+		}
+
+		return nil, fmt.Errorf("get user: %w", err)
 	}
 
 	userFromDB.UserName = user.UserName

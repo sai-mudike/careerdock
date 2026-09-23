@@ -18,14 +18,19 @@ func RegisterUser(context *gin.Context) {
 	err := context.ShouldBindJSON(&newUser)
 
 	if err != nil {
-		HandleError(context, customErr.ErrInvalidRequest)
+		HandleErrorWithGin(context, customErr.New(
+			"INVALID_REQUEST",
+			err.Error(),
+			http.StatusBadRequest,
+			err,
+		))
 		return
 	}
 
 	err = services.CreateUser(ctx, newUser)
 
 	if err != nil {
-		HandleError(context, err)
+		HandleErrorWithGin(context, err)
 		return
 	}
 
@@ -42,14 +47,19 @@ func UserLogin(context *gin.Context) {
 	err := context.ShouldBindJSON(&user)
 
 	if err != nil {
-		HandleError(context, customErr.ErrInvalidRequest)
+		HandleErrorWithGin(context, customErr.New(
+			"INVALID_REQUEST",
+			err.Error(),
+			http.StatusBadRequest,
+			err,
+		))
 		return
 	}
 
 	token, err := services.UserLogin(ctx, user)
 
 	if err != nil {
-		HandleError(context, err)
+		HandleErrorWithGin(context, err)
 		return
 	}
 

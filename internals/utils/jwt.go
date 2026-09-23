@@ -2,6 +2,8 @@ package utils
 
 import (
 	"errors"
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -22,7 +24,7 @@ func GenerateToken(username, userID string) (string, error) {
 	parsedToken, err := token.SignedString([]byte(cfg.JwtSecret))
 
 	if err != nil {
-		return "", customErr.ErrTokenGeneration
+		return "", fmt.Errorf("token Generation: %w", err)
 	}
 
 	return parsedToken, nil
@@ -33,32 +35,66 @@ func VerifyToken(token string) (string, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 
 		if !ok {
-			return nil, errors.New("Unverified Method used")
+			return nil, customErr.New(
+				customErr.CodeInvalidToken,
+				"invalid authentication token",
+				http.StatusUnauthorized,
+				nil,
+			)
 		}
 		return []byte(cfg.JwtSecret), nil
 
 	})
 
 	if err != nil {
-		return "", customErr.ErrUnauthorized
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return "", customErr.New(
+				customErr.CodeExpiredToken,
+				"authentication token has expired",
+				http.StatusUnauthorized,
+				err,
+			)
+		}
+
+		return "", customErr.New(
+			customErr.CodeInvalidToken,
+			"invalid authentication token",
+			http.StatusUnauthorized,
+			err,
+		)
 	}
 
 	isValid := parsedToken.Valid
 
 	if !isValid {
-		return "", customErr.ErrInvalidToken
+		return "", customErr.New(
+			customErr.CodeInvalidToken,
+			"invalid authentication token",
+			http.StatusUnauthorized,
+			err,
+		)
 	}
 
 	data, ok := parsedToken.Claims.(jwt.MapClaims)
 
 	if !ok {
-		return "", customErr.ErrTokenExpired
+		return "", customErr.New(
+			customErr.CodeInvalidToken,
+			"invalid authentication token",
+			http.StatusUnauthorized,
+			err,
+		)
 	}
 
-	userID := data["userID"].(string)
+	userID, ok := data["userID"].(string)
 
-	if userID == "" {
-		return "", customErr.ErrInvalidToken
+	if !ok || userID == "" {
+		return "", customErr.New(
+			customErr.CodeInvalidToken,
+			"invalid authentication token",
+			http.StatusUnauthorized,
+			err,
+		)
 	}
 
 	return userID, nil

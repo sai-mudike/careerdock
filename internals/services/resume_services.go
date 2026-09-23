@@ -2,12 +2,17 @@ package services
 
 import (
 	"context"
+	"net/http"
+	"strings"
 
+	"github.com/sai-mudike/careerdock.git/internals/customErr"
 	"github.com/sai-mudike/careerdock.git/internals/models"
 	"github.com/sai-mudike/careerdock.git/internals/repositories"
 )
 
 func UploadResume(ctx context.Context, userId string, resume models.ResumeRequest) (models.ResumeResponse, error) {
+
+	validateResume(&resume)
 
 	resumeFromClient := models.NewResume(userId, resume.Name, resume.FileName, resume.FilePath)
 
@@ -52,10 +57,23 @@ func DeleteResume(ctx context.Context, resumeID, Userid string) error {
 	if err != nil {
 		return err
 	}
-	err = repositories.DeleteJob(ctx, resumeID, Userid)
+	err = repositories.DeleteResume(ctx, resumeID, Userid)
 
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func validateResume(resume *models.ResumeRequest) error {
+	resume.Name = strings.TrimSpace(resume.Name)
+	if resume.Name == "" {
+		return customErr.New(customErr.CodeInvalidResumeName, "resume name is required", http.StatusBadRequest, nil)
+	}
+
+	if len(resume.Name) > 100 {
+		return customErr.New(customErr.CodeInvalidResumeName, "resume name must not exceed 100 characters", http.StatusBadRequest, nil)
 	}
 
 	return nil

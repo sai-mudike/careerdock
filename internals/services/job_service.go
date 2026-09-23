@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -110,55 +110,110 @@ func validateJob(job *models.Job) error {
 	job.Description = strings.TrimSpace(job.Description)
 
 	if job.CompanyName == "" {
-		return customErr.ErrInvalidJobData
+		return customErr.New(customErr.CodeInvalidJobData, "company_name is required", http.StatusBadRequest, nil)
 	}
 
 	if len(job.CompanyName) > 250 {
-		return customErr.ErrInvalidJobData
+		return customErr.New(
+			customErr.CodeInvalidJobData,
+			"company_name must not exceed 250 characters",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	if job.Position == "" {
-		return customErr.ErrInvalidJobData
+		return customErr.New(
+			customErr.CodeInvalidJobData,
+			"position is required",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	if len(job.Position) > 250 {
-		return customErr.ErrInvalidJobData
+		return customErr.New(
+			customErr.CodeInvalidJobData,
+			"position must not exceed 250 characters",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	if job.JobURL == "" {
-		return customErr.ErrInvalidJobData
+		return customErr.New(
+			customErr.CodeInvalidJobURL,
+			"job_url is required",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	u, err := url.Parse(job.JobURL)
 
 	if err != nil {
-		return customErr.ErrInvalidJob_url
+		return customErr.New(
+			customErr.CodeInvalidJobURL,
+			"job_url must be a valid URL",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 	if u.Scheme != "http" && u.Scheme != "https" {
-		return customErr.ErrInvalidJob_url
+		return customErr.New(
+			customErr.CodeInvalidJobURL,
+			"job_url must use http or https",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	if job.EmploymentType == "" {
-		return customErr.ErrInvalidEmployment_type
+		return customErr.New(
+			customErr.CodeInvalidJobData,
+			"invalid employment type",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	if job.SalaryMin != 0 && job.SalaryMin < 0 {
-		return customErr.ErrInvalidSalaryRange
+		return customErr.New(
+			customErr.CodeInvalidJobData,
+			"salary cannot be negative",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	if job.SalaryMax != 0 && job.SalaryMax < 0 {
-		return customErr.ErrInvalidSalaryRange
+		return customErr.New(
+			customErr.CodeInvalidJobData,
+			"salary cannot be negative",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 	// Salary range
 	if job.SalaryMin != 0 &&
 		job.SalaryMax != 0 &&
 		job.SalaryMin > job.SalaryMax {
 
-		return customErr.ErrInvalidSalaryRange
+		return customErr.New(
+			customErr.CodeInvalidJobData,
+			"salary_min cannot be greater than salary_max",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 	// Notes
 	if len(job.Description) > 500 {
-		return customErr.ErrInvalidJobData
+		return customErr.New(
+			customErr.CodeInvalidJobData,
+			"description must not exceed 500 characters",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	return nil
@@ -175,23 +230,42 @@ func validateQuery(query *models.JobQuery) error {
 	}
 
 	if query.Page <= 0 {
-		return customErr.ErrInvalidPagination
+		return customErr.New(
+			customErr.CodeInvalidPagination,
+			"page must be greater than 0",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	if query.Limit <= 0 || query.Limit >= 100 {
-		return customErr.ErrInvalidPagination
+		return customErr.New(
+			customErr.CodeInvalidPagination,
+			"limit must be between 1 and 100",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	if !allowedSorts[query.SortBy] {
 
-		fmt.Println(query.SortBy)
-		return customErr.ErrInvalidSort
+		return customErr.New(
+			customErr.CodeInvalidSortField,
+			"invalid sort field",
+			http.StatusBadRequest,
+			nil,
+		)
 
 	}
 
 	if query.OrderBy != "asc" && query.OrderBy != "desc" {
 
-		return customErr.ErrInvalidSortOrder
+		return customErr.New(
+			customErr.CodeInvalidSortOrder,
+			"sort order must be asc or desc",
+			http.StatusBadRequest,
+			nil,
+		)
 	}
 
 	if query.OrderBy == "asc" {

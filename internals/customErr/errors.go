@@ -1,53 +1,58 @@
 package customErr
 
-import "errors"
+type CustomErr struct {
+	Code       string
+	Message    string
+	StatusCode int
+	Err        error
+}
 
-var (
-	// 400 Bad Request
-	ErrInvalidRequest         = errors.New("invalid request")
-	ErrInvalidUUID            = errors.New("invalid UUID")
-	ErrInvalidJobData         = errors.New("invalid job data")
-	ErrInvalidSalaryRange     = errors.New("invalid salary range")
-	ErrInvalidStatus          = errors.New("invalid job status")
-	ErrInvalidJob_url         = errors.New("invalid job url")
-	ErrInvalidEmployment_type = errors.New("invalid employment type")
-	ErrInvalidApplied_at      = errors.New("invalid Applied at")
-	ErrInvalidPagination      = errors.New("invalid page number")
-	ErrInvalidSort            = errors.New("invalid sorting value")
-	ErrInvalidSortOrder       = errors.New("invalid sorting order")
-	ErrInvalidResumeData      = errors.New("invalid Resume data")
-	ErrInvalidResumeFile_path = errors.New("invalid resume file path")
-	ErrInvalidJobQuery        = errors.New("invalid sort and filter")
-	ErrResumeName             = errors.New("Resume Name required")
-	ErrInvalidFileType        = errors.New("only pdf files are accepted")
+func (e *CustomErr) Error() string {
+	return e.Message
+}
 
-	// 401 Unauthorized
-	ErrMissingToken       = errors.New("missing token")
-	ErrInvalidToken       = errors.New("invalid token")
-	ErrTokenExpired       = errors.New("token expired")
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrUnauthorized       = errors.New("Invalid or malformed authentication")
+func (e *CustomErr) Unwrap() error {
+	return e.Err
+}
 
-	// 403 Forbidden
-	ErrForbidden = errors.New("forbidden")
+func New(code, message string, statusCode int, err error) *CustomErr {
+	return &CustomErr{
+		Code:       code,
+		Message:    message,
+		StatusCode: statusCode,
+		Err:        err,
+	}
+}
 
-	// 404 Not Found
-	ErrUserNotFound                   = errors.New("user not found")
-	ErrJobNotFound                    = errors.New("job not found")
-	ErrResumeNotFound                 = errors.New("Resume not found")
-	ErrApplicationNotFound            = errors.New("Application not found")
-	ErrApplicationJobOrResumeNotFound = errors.New("job or resume not found")
+const (
+	// General
+	CodeInvalidRequest      = "INVALID_REQUEST"
+	CodeInvalidUUID         = "INVALID_UUID"
+	CodeInternalServerError = "INTERNAL_SERVER_ERROR"
 
-	// 409 Conflict
-	ErrEmailAlreadyExists  = errors.New("email already exists")
-	ErrDuplicateJob        = errors.New("job already exists")
-	ErrResumeAlreadyExists = errors.New("resume already exists")
+	// Authentication
+	CodeUnauthorized       = "UNAUTHORIZED"
+	CodeInvalidToken       = "INVALID_TOKEN"
+	CodeExpiredToken       = "EXPIRED_TOKEN"
+	CodeInvalidCredentials = "INVALID_CREDENTIALS"
 
-	// 413 REQUEST ENTITY TOO LARGE
-	ErrMaxResumeSize = errors.New("Resume must not exceed 5 MB")
+	// User
+	CodeUserNotFound       = "USER_NOT_FOUND"
+	CodeEmailAlreadyExists = "EMAIL_ALREADY_EXISTS"
 
-	// 500 Internal Server Error
-	ErrInternal        = errors.New("internal server error")
-	ErrUserNotCreated  = errors.New("unable to register user.")
-	ErrTokenGeneration = errors.New("Failed to issue session token. Please try again later.")
+	// Jobs
+	CodeJobNotFound           = "JOB_NOT_FOUND"
+	CodeInvalidJobData        = "INVALID_JOB_DATA"
+	CodeInvalidJobURL         = "INVALID_JOB_URL"
+	CodeInvalidEmploymentType = "INVALID_EMPLOYMENT_TYPE"
+	CodeInvalidPagination     = "INVALID_PAGINATION"
+	CodeInvalidSortField      = "INVALID_SORT_FIELD"
+	CodeInvalidSortOrder      = "INVALID_SORT_ORDER"
+
+	// Resumes
+	CodeResumeNotFound    = "RESUME_NOT_FOUND"
+	CodeInvalidResumeName = "INVALID_RESUME_NAME"
+	CodeInvalidFileType   = "INVALID_FILE_TYPE"
+	CodeFileTooLarge      = "FILE_TOO_LARGE"
+	CodeFileRequired      = "FILE_REQUIRED"
 )
