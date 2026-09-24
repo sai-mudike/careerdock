@@ -10,7 +10,11 @@ func GenerateHashPass(password string) (string, error) {
 
 	hashPass, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 
-	return string(hashPass), fmt.Errorf("hash pass: %w", err)
+	if err != nil {
+		return "", fmt.Errorf("hash pass: %w", err)
+	}
+
+	return string(hashPass), nil
 
 }
 

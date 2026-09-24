@@ -55,4 +55,10 @@ const (
 	CodeInvalidFileType   = "INVALID_FILE_TYPE"
 	CodeFileTooLarge      = "FILE_TOO_LARGE"
 	CodeFileRequired      = "FILE_REQUIRED"
+
+	// Applications
+	CodeApplicationAlreadyExists = "APPLICATION_ALREADY_EXISTS"
+	CodeInvalidApplicationData   = "INVALID_APPLICATION_DATA"
+	CodeApplicationNotFound      = "Application_NOT_FOUND"
+	CodeInvalidApplicationStatus = "INVALID_APPLICATION_STATUS"
 )

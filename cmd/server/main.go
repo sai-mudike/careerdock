@@ -36,9 +36,17 @@ func main() {
 	authenticator.GET("/api/resumes/:id", handlers.GetResumeByID)
 	authenticator.DELETE("/api/resumes/:id", handlers.DeleteResume)
 
+	// Application Routes
+	authenticator.POST("/api/applications", handlers.CreateApplication)
+	authenticator.GET("/api/applications", handlers.GetAllApplications)
+	authenticator.GET("/api/applications/:id", handlers.GetApplicationByID)
+	authenticator.PUT("/api/applications/:id", handlers.UpdateApplication)
+	authenticator.DELETE("/api/applications/:id", handlers.DeleteApplication)
+
 	// User Routes
 	server.POST("/api/register", handlers.RegisterUser)
 	server.POST("/api/login", handlers.UserLogin)
+
 	// API Health
 	server.GET("/healthz", handlers.Health)
 

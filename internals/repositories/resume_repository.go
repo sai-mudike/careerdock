@@ -83,7 +83,7 @@ func GetResumeByID(ctx context.Context, resumeID, userID string) (models.ResumeR
 			return models.ResumeResponse{}, customErr.New(customErr.CodeResumeNotFound, "resume not found", http.StatusNotFound, err)
 		}
 
-		return models.ResumeResponse{}, fmt.Errorf("get by id: %w", err)
+		return models.ResumeResponse{}, fmt.Errorf("get resume by id: %w", err)
 	}
 
 	return resumeFromDB, nil
